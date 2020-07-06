@@ -3,9 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Nota;
 
 class NotaController extends Controller
 {
+
+    public function __construct(){
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -13,7 +19,12 @@ class NotaController extends Controller
      */
     public function index()
     {
-        //
+        //code
+        //return auth()->user();
+        $email = auth()->user()->email;
+        $nota = "ejemplo";
+        $nota = Nota::where('usuario',$email)->paginate(5);
+        return view('notas.lista', compact('nota'));
     }
 
     /**
@@ -24,6 +35,7 @@ class NotaController extends Controller
     public function create()
     {
         //
+        return  view('notas/crear');
     }
 
     /**
@@ -35,6 +47,19 @@ class NotaController extends Controller
     public function store(Request $request)
     {
         //
+        $request->validate([
+            'nombre' => 'required',
+            'descripcion' => 'required'
+        ]);
+
+        $newNote = new Nota();
+        $newNote->nombre = $request->nombre;
+        $newNote->descripcion = $request->descripcion;
+        $newNote->usuario = auth()->user()->email;
+
+        $newNote->save();
+
+        return back()->with('mensaje',"Se creo una Nota!");
     }
 
     /**
